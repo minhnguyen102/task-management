@@ -1,14 +1,8 @@
 const express = require("express")
 const router = express.Router();
-const Taks = require("../../../models/taks.model")
+const controller = require("../controllers/tasks.controller")
 
-router.get('/', async (req, res) => {
-    const taks = await Taks.find({
-        deleted : false
-    });
-    console.log(taks);
-
-    res.json(taks)
-})
+router.get('/', controller.index)
+router.get('/detail/:id', controller.detail)
 
 module.exports = router;
