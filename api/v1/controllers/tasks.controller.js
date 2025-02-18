@@ -54,6 +54,7 @@ module.exports.detail = async (req, res) => {
     })
     res.json(task);
 }
+
 // [PATCH] /api/v1/tasks/change-status/:id
 module.exports.changeStatus = async (req, res) => {
     try {
@@ -76,4 +77,43 @@ module.exports.changeStatus = async (req, res) => {
         })
     }
     
+}
+
+// [PATCH] /api/v1/tasks/change-multi
+module.exports.changeMulti = async (req, res) =>{
+    try {
+        const {ids, key, value} = req.body;
+    switch (key){
+        case "status":
+            await Task.updateMany(
+                {_id : {$in : ids}},
+                {status : value}
+            )
+            break;
+        case "deleted":
+            await Task.updateMany(
+                {_id : {$in : ids}},
+                {deleted : value}
+            )
+            break;
+        default:
+            break;
+    }
+    res.json({
+        code : 200,
+        message : "Cập nhật trạng thái sản phẩm thành công"
+    })
+
+    } catch (error) {
+        res.json({
+            code : 404,
+            message : "Cập nhật trạng thái các sản phẩm không thành côngcông"
+        })
+    }
+    
+    
+
+    // res.json({
+    //     code : 200
+    // })
 }
