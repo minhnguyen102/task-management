@@ -110,10 +110,4 @@ module.exports.changeMulti = async (req, res) =>{
             message : "Cập nhật trạng thái các sản phẩm không thành côngcông"
         })
     }
-    
-    
-
-    // res.json({
-    //     code : 200
-    // })
 }
