@@ -43,6 +43,7 @@ module.exports.index = async (req, res) =>{
                         .sort(sort)
                         .limit(objectPagination.limitItem)
                         .skip(objectPagination.skip)
+    console.log(task);
     res.json(task)
 }
 
