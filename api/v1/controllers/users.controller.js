@@ -69,7 +69,6 @@ module.exports.login = async (req, res) =>{
     })
 }
 
-
 // [POST] /api/v1/password/forgot
 module.exports.forgotPassword = async (req, res) =>{
     const email = req.body.email;
@@ -104,5 +103,61 @@ module.exports.forgotPassword = async (req, res) =>{
     res.json({
         code : 200,
         message : "Đã gửi mã OTP qua email"
+    })
+}
+
+// [POST] /api/v1/password/otp
+module.exports.otpPassword = async (req, res) =>{
+    const {email, otp} = req.body;
+
+    const result = await ForgotPassword.findOne({
+        email : email,
+        otp : otp
+    })
+
+    if(!result){
+        res.json({
+            code : 400,
+            message : "Mã otp không đúng"
+        })
+        return;
+    }
+
+    const user = await User.findOne({
+        email : email
+    })
+    
+    const tokenUser = user.tokenUser;
+    res.cookie("tokenUser", tokenUser);
+
+    res.json({
+        code : 200,
+        message : "Xác thực mã OTP thành công"
+    })
+}
+
+// [POST] /api/v1/password/reset
+module.exports.resetPassword = async (req, res) =>{
+    const password = md5(req.body.password);
+    const tokenUser = req.cookies.tokenUser;
+
+    const user = await User.findOne({tokenUser : tokenUser})
+
+    if(password == user.password){
+        res.json({
+            code : 400,
+            message : "Cập nhật mật khẩu khác với mật khẩu cũ"
+        })
+        return;
+    }
+
+    await User.updateOne(
+        {tokenUser : tokenUser},
+        {password : password}
+    )
+
+    res.json({
+        code : 200,
+        message : "Cập nhật mật khẩu thành công"
     })
 }
