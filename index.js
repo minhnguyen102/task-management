@@ -8,8 +8,6 @@ const router = require("./api/v1/routes/index.rotuer")
 const database = require("./config/database")
 database.connect();
 
-const Task = require("./models/task.model")
-
 router(app);
 
 app.listen(port, () => {
