@@ -1,10 +1,12 @@
 require("dotenv").config();
 const express = require('express')
+var cors = require('cors')
 const app = express()
 const port = process.env.PORT || 8080
 const router = require("./api/v1/routes/index.rotuer")
 var bodyParser = require('body-parser')
 
+app.use(cors())
 // connect database
 const database = require("./config/database")
 database.connect();
