@@ -32,7 +32,6 @@ module.exports.index = async (req, res) => {
 
     // Search
         const objectSearch = searchHelper(req.query);
-        console.log(objectSearch)
         if(objectSearch.regex){
             find.title = objectSearch.regex;
         }
@@ -79,6 +78,33 @@ module.exports.changeStatus = async (req, res) => {
         res.json({
             code : 400,
             message : "Không tồn tại"
+        })
+    }
+}
+
+module.exports.changeMulti = async (req, res) => {
+    try {
+        const {ids, key, value } = req.body;
+        switch (key) {
+            case "status":
+                await Task.updateMany(
+                    {_id : {$in : ids}},
+                    {$set : {
+                        status : value
+                    }}
+                )
+                res.json({
+                    code : 200,
+                    message : "Thanh cong"
+                })
+                break;
+            default:
+                break;
+        }
+    } catch (error) {
+        res.json({
+            code : 400,
+            message : "Lỗi"
         })
     }
 }
