@@ -162,19 +162,13 @@ module.exports.resetPassword = async (req, res) =>{
     })
 }
 
-// [POST] /api/v1/password/reset
+// [GET] /api/v1/users/detail
 module.exports.detail = async (req, res) =>{
-    const tokenUser = req.cookies.tokenUser;
-    const user = await User.findOne({
-        tokenUser : tokenUser,
-        deleted : false
-    }).select("-password -tokenUser")
-
-    if(user){
+    if(req.user){
         res.json({
             code : 200,
             message : "Thông tin cá nhân",
-            infor : user
+            infor : req.user
         })
     }else{
         res.json({
