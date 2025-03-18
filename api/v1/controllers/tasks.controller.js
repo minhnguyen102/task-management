@@ -2,6 +2,7 @@ const Task = require("../models/task.model")
 const paginationHelper = require("../../../helpers/pagination")
 const searchHelper = require("../../../helpers/search")
 
+// [GET] /api/v1/tasks
 module.exports.index = async (req, res) => {
     let find = {
         deleted : false
@@ -45,6 +46,7 @@ module.exports.index = async (req, res) => {
     res.json(tasks)
 }
 
+// [GET] /api/v1/tasks/detail/:id
 module.exports.detail = async (req, res) => {
     try {
         const id = req.params.id;
@@ -61,6 +63,7 @@ module.exports.detail = async (req, res) => {
     }
 }
 
+// [POST] /api/v1/tasks/change-status/:id
 module.exports.changeStatus = async (req, res) => {
     try {
         const id = req.params.id;
@@ -82,6 +85,7 @@ module.exports.changeStatus = async (req, res) => {
     }
 }
 
+// [POST] /api/v1/tasks/change-multi
 module.exports.changeMulti = async (req, res) => {
     try {
         const {ids, key, value } = req.body;
@@ -109,6 +113,7 @@ module.exports.changeMulti = async (req, res) => {
     }
 }
 
+// [POST] /api/v1/tasks/create
 module.exports.create = async (req, res) => {
     try {
         const task = new Task(req.body)
@@ -117,6 +122,23 @@ module.exports.create = async (req, res) => {
             code : 200,
             message : "Tạo mới thành công",
             data : data
+        })
+    } catch (error) {
+        res.json({
+            code : 400,
+            message : "Lỗi"
+        })
+    }
+}
+
+// [POST] /api/v1/tasks/edit/:id
+module.exports.edit = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await Task.updateOne({_id : id,deleted : false},req.body)
+        res.json({
+            code : 200,
+            message : "Cập nhật thông tin thành công"
         })
     } catch (error) {
         res.json({
