@@ -3,10 +3,23 @@ const router = express.Router()
 const Task = require("../../../models/task.model")
 
 router.get('/', async (req, res) => {
-    const tasks = await Task.find({
+    let find = {
         deleted : false
-    })
-    console.log(tasks)
+    }
+
+    //filter-status
+    if(req.query.status){
+        find.status = req.query.status;
+    }
+
+    //sort
+    let sort = {};
+
+    if(req.query.sortKey && req.query.sortValue){
+        sort[req.query.sortKey] = req.query.sortValue
+    }
+    // end sort
+    const tasks = await Task.find(find).sort(sort)
     res.json(tasks)
 })
 
