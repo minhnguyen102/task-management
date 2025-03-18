@@ -8,12 +8,10 @@ const sendMailHelper = require("../../../helpers/sendMail")
 module.exports.register = async (req, res) =>{
     req.body.password = md5(req.body.password)
     const {fullName, email, password} = req.body
-
     const exitEmail = await User.findOne({
         email : email,
         deleted : false
     })
-    console.log(exitEmail);
     if(exitEmail){
         res.json({
             code : 400,
@@ -23,7 +21,8 @@ module.exports.register = async (req, res) =>{
         const user = new User({
             fullName : fullName,
             email : email,
-            password : password
+            password : password,
+            tokenUser : generateHelper.generateRandomString(30)
         })
         await user.save();
         const tokenUser = user.tokenUser
@@ -85,11 +84,12 @@ module.exports.forgotPassword = async (req, res) =>{
         return;
     }
     // Bước 1 : Tạo ra mã otp và lưu vào database {mã otp, email}, lưu với thời gian nhất định
+    const timeExpire = 5;
     const otp = generateHelper.generateRandomNumber(6);
     const objectForgot = {
         email : email,
         otp : otp,
-        expireAt : Date.now()
+        expireAt : Date.now() + timeExpire*1000*60
     }
 
     const forgotPassword = new ForgotPassword(objectForgot);
@@ -160,4 +160,26 @@ module.exports.resetPassword = async (req, res) =>{
         code : 200,
         message : "Cập nhật mật khẩu thành công"
     })
+}
+
+// [POST] /api/v1/password/reset
+module.exports.detail = async (req, res) =>{
+    const tokenUser = req.cookies.tokenUser;
+    const user = await User.findOne({
+        tokenUser : tokenUser,
+        deleted : false
+    }).select("-password -tokenUser")
+
+    if(user){
+        res.json({
+            code : 200,
+            message : "Thông tin cá nhân",
+            infor : user
+        })
+    }else{
+        res.json({
+            code : 400,
+            message : "Không tồn tại"
+        })
+    }
 }
