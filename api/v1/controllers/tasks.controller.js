@@ -1,5 +1,6 @@
 const Task = require("../models/task.model")
 const paginationHelper = require("../../../helpers/pagination")
+const searchHelper = require("../../../helpers/search")
 
 module.exports.index = async (req, res) => {
     let find = {
@@ -23,12 +24,20 @@ module.exports.index = async (req, res) => {
     const totalTask = await Task.countDocuments(find);
     let objectPagination = paginationHelper(
         {
-            limitItem : 2, // tránh truyền cứng số 5 khi ứng dụng vào các trang khác 
+            limitItem : 4, // tránh truyền cứng số 5 khi ứng dụng vào các trang khác 
             currentPage : 1,
         },
         req.query, totalTask);
-    console.log(objectPagination)
     //end pagination
+
+    // Search
+        const objectSearch = searchHelper(req.query);
+        console.log(objectSearch)
+        if(objectSearch.regex){
+            find.title = objectSearch.regex;
+        }
+        // chưa thể tìm đa dạng, mới chỉ cho phép không phân biệt chữ hoa chữ thường
+    // End Search
 
     const tasks = await Task.find(find)
                             .sort(sort)
