@@ -1,6 +1,10 @@
+const ForgotPassword = require("../models/forgotPassword.model")
 const User = require("../models/user.model")
 const md5 = require("md5")
+const generateHelper = require("../../../helpers/generate")
+const sendMailHelper = require("../../../helpers/sendMail")
 
+// [POST] /api/v1/user/register
 module.exports.register = async (req, res) =>{
     req.body.password = md5(req.body.password)
     const {fullName, email, password} = req.body
@@ -31,4 +35,74 @@ module.exports.register = async (req, res) =>{
             tokenUser : tokenUser
         })
     }
+}
+
+// [POST] /api/v1/user/login
+module.exports.login = async (req, res) =>{
+    const {email, password} = req.body;
+    const user = await User.findOne({
+        email : email,
+        deleted : false
+    })
+    if(!user){
+        res.json({
+            code : 400,
+            message : "Email không tồn tại"
+        })
+        return;
+    }
+
+    if(md5(password) !== user.password){
+        res.json({
+            code : 400,
+            message : "Sai mật khẩu"
+        })
+        return;
+    }
+
+    const tokenUser = user.tokenUser;
+    res.cookie("tokenUser", tokenUser)
+    res.json({
+        code : 200,
+        message : "Đăng nhập thành công",
+        tokenUser : tokenUser
+    })
+}
+
+
+// [POST] /api/v1/password/forgot
+module.exports.forgotPassword = async (req, res) =>{
+    const email = req.body.email;
+    const user = await User.findOne({
+        email : email,
+        deleted : false
+    })
+
+    if(!user){
+        res.json({
+            code : 400,
+            message : "Email không tồn tại"
+        })
+        return;
+    }
+    // Bước 1 : Tạo ra mã otp và lưu vào database {mã otp, email}, lưu với thời gian nhất định
+    const otp = generateHelper.generateRandomNumber(6);
+    const objectForgot = {
+        email : email,
+        otp : otp,
+        expireAt : Date.now()
+    }
+
+    const forgotPassword = new ForgotPassword(objectForgot);
+    await forgotPassword.save();
+
+    // Gửi otp qua mail cho người dùng 
+    const subject = "Cấp mã OTP";
+    const html = `Mã xác thực của bạn là : <b>${otp}</b>.Hết hạn trong thời gian 1 phút. Vui lòng không tiết lộ cho ai khác.`
+    sendMailHelper.sendEmail(email, subject, html)
+    
+    res.json({
+        code : 200,
+        message : "Đã gửi mã OTP qua email"
+    })
 }
