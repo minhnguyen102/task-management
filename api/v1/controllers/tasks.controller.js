@@ -55,6 +55,30 @@ module.exports.detail = async (req, res) => {
         })
         res.json(task)
     } catch (error) {
-        res.json("Khong tim thay")
+        res.json({
+            code : 400,
+            message : "Không tồn tại"
+        })
+    }
+}
+
+module.exports.changeStatus = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const task = await Task.updateOne({
+            _id : id,
+            deleted : false,
+        },{
+            status : req.body.status
+        })
+        res.json({
+            code : 200,
+            message : "Cập nhật trạng thái thành công"
+        })
+    } catch (error) {
+        res.json({
+            code : 400,
+            message : "Không tồn tại"
+        })
     }
 }
